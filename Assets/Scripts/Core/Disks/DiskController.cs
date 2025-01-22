@@ -29,6 +29,14 @@ public class DiskController : MonoBehaviour
         }
     }
 
+    public void DestroyDisks()
+    {
+        foreach (var diskContainer in _diskContainers)
+        {
+            Destroy(diskContainer.Value.gameObject);
+        }
+    }
+
     public void FastSetDisksToColumn(Dictionary<int, Vector3> positions)
     {
         foreach (var position in positions)
