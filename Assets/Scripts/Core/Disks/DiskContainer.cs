@@ -4,5 +4,11 @@ using UnityEngine;
 
 public class DiskContainer : MonoBehaviour
 {
-    [field: SerializeField] public DiskType Type { get; private set; }
+    [SerializeField] private MeshRenderer _meshRenderer;
+
+    public void Initialize(float scale, Material material)
+    {
+        transform.localScale = new Vector3(scale, 1, scale);
+        _meshRenderer.material = material;
+    }
 }

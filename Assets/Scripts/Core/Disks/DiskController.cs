@@ -5,28 +5,31 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Triggers;
 using DG.Tweening;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class DiskController : MonoBehaviour
 {
-    [SerializeField] private DiskContainer[] _disks;
+    [SerializeField] private DiskContainer _disksPrefab;
     [SerializeField] private float _speed = 1;
-    private readonly Dictionary<DiskType, DiskContainer> _diskContainers = new();
+    [SerializeField] private Material[] _materials;
+    private readonly Dictionary<int, DiskContainer> _diskContainers = new();
 
-    [ContextMenu("Find all children disks")]
-    private void FindAllDisks()
+    public void InitializeDisks(int count)
     {
-        _disks = GetComponentsInChildren<DiskContainer>();
-    }
-
-    private void Start()
-    {
-        foreach (var diskContainer in _disks)
+        var materials = new List<Material>(_materials);
+        for (var i = 0; i < count; i++)
         {
-            _diskContainers.Add(diskContainer.Type, diskContainer);
+            var newDisk = Instantiate(_disksPrefab, transform);
+            _diskContainers.Add(i, newDisk);
+
+            var randomMaterial = materials[Random.Range(0, materials.Count+1)];
+            materials.Remove(randomMaterial);
+            
+            newDisk.Initialize(i+1, randomMaterial);
         }
     }
 
-    public void FastSetDisksToColumn(Dictionary<DiskType, Vector3> positions)
+    public void FastSetDisksToColumn(Dictionary<int, Vector3> positions)
     {
         foreach (var position in positions)
         {
@@ -34,13 +37,13 @@ public class DiskController : MonoBehaviour
         }
     }
 
-    public async UniTask StartMoveToPoint(DiskType type, Vector3 position)
+    public async UniTask StartMoveToPoint(int type, Vector3 position)
     {
         var duration = (position - _diskContainers[type].transform.position).magnitude / _speed;
         await _diskContainers[type].transform.DOMove(position, duration).SetSpeedBased().ToUniTask();
     }
 
-    public async UniTask StartMoveToPoint(DiskType type, Vector3[] positions)
+    public async UniTask StartMoveToPoint(int type, Vector3[] positions)
     {
         foreach (var position in positions)
         {

@@ -2,5 +2,5 @@
 
 public class Column
 {
-    public readonly Stack<DiskType> Disks = new();
+    public readonly Stack<int> Disks = new();
 }
