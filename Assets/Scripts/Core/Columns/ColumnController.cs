@@ -52,6 +52,4 @@ public class ColumnController : MonoBehaviour
     {
         _columns = GetComponentsInChildren<ColumnContainer>();
     }
-    
-    
 }
