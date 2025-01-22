@@ -39,4 +39,12 @@ public class DiskController : MonoBehaviour
         var duration = (position - _diskContainers[type].transform.position).magnitude / _speed;
         await _diskContainers[type].transform.DOMove(position, duration).SetSpeedBased().ToUniTask();
     }
+
+    public async UniTask StartMoveToPoint(DiskType type, Vector3[] positions)
+    {
+        foreach (var position in positions)
+        {
+            await StartMoveToPoint(type, position);
+        }
+    }
 }
