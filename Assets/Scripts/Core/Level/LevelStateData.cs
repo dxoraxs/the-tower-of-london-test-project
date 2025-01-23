@@ -1,25 +1,38 @@
 using System.Collections.Generic;
+using System.Text;
 
 public class LevelStateData
 {
-    public readonly Stack<int>[] InitialPosition = { new(), new(), new() };
+    public readonly int[][] InitialPosition;
 
-    public readonly int MaxCountStep;
-    public readonly int FinalColumnIndex;
+    public readonly int DiskCount;
 
-    public LevelStateData(int[][] initialPositions, int maxCountStep, int finalColumnIndex)
+    public LevelStateData(int[][] initialPositions, int diskCount)
     {
-        for (var columnIndex = 0;
-             columnIndex < InitialPosition.Length && columnIndex < initialPositions.Length;
-             columnIndex++)
+        InitialPosition = initialPositions;
+
+        DiskCount = diskCount;
+    }
+
+    public override string ToString()
+    {
+        var strBuilder = new StringBuilder();
+
+        foreach (var column in InitialPosition)
         {
-            for (var verticalIndex = 0; verticalIndex < initialPositions[columnIndex].Length; verticalIndex++)
+            foreach (var i in column)
             {
-                InitialPosition[columnIndex].Push(initialPositions[columnIndex][verticalIndex]);
+                strBuilder.Append($"[{i}]\t");
             }
+
+            for (var i = column.Length; i < DiskCount; i++)
+            {
+                strBuilder.Append("[  ]\t");
+            }
+
+            strBuilder.AppendLine();
         }
 
-        MaxCountStep = maxCountStep;
-        FinalColumnIndex = finalColumnIndex;
+        return strBuilder.ToString();
     }
 }

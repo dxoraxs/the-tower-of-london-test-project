@@ -22,10 +22,10 @@ public class DiskController : MonoBehaviour
             var newDisk = Instantiate(_disksPrefab, transform);
             _diskContainers.Add(i, newDisk);
 
-            var randomMaterial = materials[Random.Range(0, materials.Count+1)];
+            var randomMaterial = materials[Random.Range(0, materials.Count)];
             materials.Remove(randomMaterial);
             
-            newDisk.Initialize(i+1, randomMaterial);
+            newDisk.Initialize(i+2, randomMaterial);
         }
     }
 
@@ -35,6 +35,7 @@ public class DiskController : MonoBehaviour
         {
             Destroy(diskContainer.Value.gameObject);
         }
+        _diskContainers.Clear();
     }
 
     public void FastSetDisksToColumn(Dictionary<int, Vector3> positions)
@@ -48,7 +49,7 @@ public class DiskController : MonoBehaviour
     public async UniTask StartMoveToPoint(int type, Vector3 position)
     {
         var duration = (position - _diskContainers[type].transform.position).magnitude / _speed;
-        await _diskContainers[type].transform.DOMove(position, duration).SetSpeedBased().ToUniTask();
+        await _diskContainers[type].transform.DOMove(position, duration).ToUniTask();
     }
 
     public async UniTask StartMoveToPoint(int type, Vector3[] positions)

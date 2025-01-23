@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using Data;
-using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public class LevelGenerator : ILevelGenerator
@@ -11,7 +8,6 @@ public class LevelGenerator : ILevelGenerator
     private readonly List<int> _disks = new();
     private readonly List<int> _columns = new();
     private readonly Dictionary<ComplexityType, ComplexityData> _complexityData = new ();
-    private readonly int _thresholdStepCount;
 
     public LevelGenerator(LevelSettings levelSettings, int columnCount)
     {
@@ -19,8 +15,7 @@ public class LevelGenerator : ILevelGenerator
         {
             _columns.Add(i);
         }
-
-        _thresholdStepCount = levelSettings.ThresholdStepCount;
+        
         foreach (var data in levelSettings.ComplexityData)
         {
             _complexityData.Add(data.Type, data);
@@ -30,23 +25,29 @@ public class LevelGenerator : ILevelGenerator
     public LevelStateData GetNewLevelStateData()
     {
         var finalColumnIndex = _columns[Random.Range(0, _columns.Count)];
-        var randomStepByComplexity = RandomStepByComplexity();
-        var initialPosition = CalculateStartPosition(randomStepByComplexity, finalColumnIndex);
+        var randomComplexity = RandomComplexity();
+        var diskCount = randomComplexity.CountDisks;
+
+        _disks.Clear();
+        for (var i = 0; i < diskCount; i++)
+        {
+            _disks.Add(i);
+        }
         
-        var resultData = new LevelStateData(initialPosition, randomStepByComplexity, finalColumnIndex);
+        var initialPosition = CalculateStartPosition(finalColumnIndex);
+        
+        var resultData = new LevelStateData(initialPosition, diskCount);
 
         return resultData;
     }
 
-    private int RandomStepByComplexity()
+    private ComplexityData RandomComplexity()
     {
         var currentGameComplexityType = ComplexityTypeHelper.GetRandomComplexityType();
-        var currentComplexityData = _complexityData[currentGameComplexityType];
-        var randomStepByComplexity = Random.Range(currentComplexityData.MinStep, currentComplexityData.MaxStep + 1);
-        return randomStepByComplexity;
+        return _complexityData[currentGameComplexityType];
     }
 
-    private int[][] CalculateStartPosition(int stepCount, int finalColumnIndex)
+    private int[][] CalculateStartPosition(int finalColumnIndex)
     {
         var freeColumnIndex = new List<int>(_columns);
         var diskPositions = _columns.Select(i => new Stack<int>()).ToList();
@@ -58,17 +59,26 @@ public class LevelGenerator : ILevelGenerator
 
         var lastDiskType = int.MaxValue;
 
-        for (; stepCount > 1; stepCount--)
+        for (var i = 0; i < _disks.Count; i++)
         {
             DoStep();
         }
 
         void DoStep()
         {
-            var popColumnIndex = diskPositions.FindIndex(column => column.Any() && lastDiskType != column.Peek()); 
+            var suitableColumns = diskPositions
+                .Where(column => column.Any() && lastDiskType != column.Peek());
+            if (!suitableColumns.Any())
+            {
+                return;
+            }
+            var randomPopColumn = suitableColumns.ElementAt(Random.Range(0, suitableColumns.Count()));
+            var popColumnIndex = diskPositions.IndexOf(randomPopColumn); 
             lastDiskType = diskPositions[popColumnIndex].Pop();
             freeColumnIndex.Remove(popColumnIndex);
-            var nextColumnIndex = freeColumnIndex[Random.Range(0, freeColumnIndex.Count + 1)];
+
+            var nextColumnIndex = freeColumnIndex[Random.Range(0, freeColumnIndex.Count)];
+
             diskPositions[nextColumnIndex].Push(lastDiskType);
             freeColumnIndex.Add(popColumnIndex);
         }

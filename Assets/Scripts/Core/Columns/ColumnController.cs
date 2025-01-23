@@ -1,14 +1,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
 
 public class ColumnController : MonoBehaviour
 {
+    public readonly Subject<int> OnColumnClick = new();
     [SerializeField] private ColumnContainer[] _columns;
-    [Space,SerializeField] private float _horizontalOffset;
+    [Space, SerializeField] private float _horizontalOffset;
     [SerializeField] private float _verticalDiskOffset;
     [SerializeField] private float _startVerticalDiskOffset;
+
+    public Vector3 GetPositionByIndex(int columnIndex, int verticalIndex)
+    {
+        var horizontalPositionByColumnIndex = GetHorizontalPositionByColumnIndex(columnIndex);
+        var verticalPositionByDiskIndex = GetVerticalPositionByDiskIndex(verticalIndex);
+        return new Vector3(horizontalPositionByColumnIndex, verticalPositionByDiskIndex, 0);
+    }
 
     public float GetHorizontalPositionByColumnIndex(int index)
     {
@@ -19,7 +28,22 @@ public class ColumnController : MonoBehaviour
     {
         return _startVerticalDiskOffset + index * (1 + _verticalDiskOffset);
     }
-    
+
+    private void Start()
+    {
+        for (var i = 0; i < _columns.Length; i++)
+        {
+            var container = _columns[i];
+            var index = i;
+            container.SubscribeToMouseDown(() => OnColumnMouseDown(index));
+        }
+    }
+
+    private void OnColumnMouseDown(int index)
+    {
+        OnColumnClick.OnNext(index);
+    }
+
     private void OnValidate()
     {
         ResetColumnPosition();
@@ -42,9 +66,9 @@ public class ColumnController : MonoBehaviour
         Gizmos.color = Color.blue;
         Gizmos.DrawWireCube(Vector3.zero + Vector3.up * GetVerticalPositionByDiskIndex(0), new Vector3(4, 1, 1));
         Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(Vector3.zero + Vector3.up * GetVerticalPositionByDiskIndex(1), new Vector3(3,1,1));
+        Gizmos.DrawWireCube(Vector3.zero + Vector3.up * GetVerticalPositionByDiskIndex(1), new Vector3(3, 1, 1));
         Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(Vector3.zero + Vector3.up * GetVerticalPositionByDiskIndex(2), new Vector3(2,1,1));
+        Gizmos.DrawWireCube(Vector3.zero + Vector3.up * GetVerticalPositionByDiskIndex(2), new Vector3(2, 1, 1));
     }
 
     [ContextMenu("Find all children column")]

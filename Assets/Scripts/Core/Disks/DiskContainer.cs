@@ -8,7 +8,7 @@ public class DiskContainer : MonoBehaviour
 
     public void Initialize(float scale, Material material)
     {
-        transform.localScale = new Vector3(scale, 1, scale);
+        transform.localScale = new Vector3(scale, .5f, scale);
         _meshRenderer.material = material;
     }
 }
