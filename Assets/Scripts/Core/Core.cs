@@ -12,27 +12,32 @@ public class Core : MonoBehaviour
     [SerializeField] private ColumnController _columnController;
     [SerializeField] private DiskController _diskController;
     [SerializeField] private LevelSettings _levelSettings;
+    [SerializeField] private GameScreen _gameScreen;
+    [SerializeField] private EndScreen _endScreen;
     private readonly List<Column> _columns = new();
+    private LevelStateData _levelStateData;
+    private readonly ReactiveProperty<int> _stepCounter = new();
 
     private void SetRandomDisks()
     {
         var levelGenerator = new LevelGenerator(_levelSettings, 3);
-        var level = levelGenerator.GetNewLevelStateData();
-        Debug.Log(level);
+        _levelStateData = levelGenerator.GetNewLevelStateData();
+        _stepCounter.Value = _levelStateData.StepCount;
+        Debug.Log(_levelStateData);
 
         _diskController.DestroyDisks();
-        _diskController.InitializeDisks(level.DiskCount);
+        _diskController.InitializeDisks(_levelStateData.DiskCount);
 
         var diskPosition = new Dictionary<int, Vector3>();
 
         _columns.Clear();
-        for (var x = 0; x < level.InitialPosition.Length; x++)
+        for (var x = 0; x < _levelStateData.InitialPosition.Length; x++)
         {
             var column = new Column();
             _columns.Add(column);
-            for (var y = 0; y < level.InitialPosition[x].Length; y++)
+            for (var y = 0; y < _levelStateData.InitialPosition[x].Length; y++)
             {
-                var diskIndex = level.InitialPosition[x][y];
+                var diskIndex = _levelStateData.InitialPosition[x][y];
                 if (diskIndex < 0) continue;
 
                 var horizontalPosition = _columnController.GetHorizontalPositionByColumnIndex(x);
@@ -50,12 +55,15 @@ public class Core : MonoBehaviour
 
     private void Start()
     {
+        _stepCounter.Subscribe(_gameScreen.UpdateCounter);
         SetRandomDisks();
-        WaitingColumnDown();
+        WaitingColumnClick();
     }
 
-    private async void WaitingColumnDown()
+    private async void WaitingColumnClick()
     {
+        _gameScreen.ShowScreen();
+        bool resultLevel;
         while (true)
         {
             var firstColumnIndex = await _columnController.OnColumnClick.First().ToUniTask();
@@ -67,16 +75,34 @@ public class Core : MonoBehaviour
             var secondColumnIndex = await _columnController.OnColumnClick.First().ToUniTask();
 
             await OnSecondClickColumn(firstColumnIndex, secondColumnIndex);
-
-            if (CheckTOEndLevel()) break;
+            
+            if (CheckToEndLevel())
+            {
+                resultLevel = true;
+                break;
+            }
+            
+            _stepCounter.Value--;
+            if (_stepCounter.Value == 0)
+            {
+                resultLevel = false;
+                break;
+            }
         }
 
         await UniTask.Delay(1000);
-        SetRandomDisks();
-        WaitingColumnDown();
-    }
+        _gameScreen.HideScreen();
+        _endScreen.ShowScreen();
+        _endScreen.SetResult(resultLevel);
 
-    private bool CheckTOEndLevel()
+        await _endScreen.OnClickRestart.First().ToUniTask();
+        
+        _endScreen.HideScreen();
+        SetRandomDisks();
+        WaitingColumnClick();
+    }
+    
+    private bool CheckToEndLevel()
     {
         var countColumnsWithDisks = _columns.Where(x => x.Disks.Any());
         if (countColumnsWithDisks.Count() > 1) return false;

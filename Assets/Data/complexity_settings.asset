@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5109b2fe17314374af86078068858a6d, type: 3}
   m_Name: complexity_settings
   m_EditorClassIdentifier: 
+  ThresholdStepCount: 4
   _complexityData:
   - <Type>k__BackingField: 0
-    <MinStep>k__BackingField: 2
-    <MaxStep>k__BackingField: 4
+    <CountDisks>k__BackingField: 2
+    <MaxCountStep>k__BackingField: 2
   - <Type>k__BackingField: 1
-    <MinStep>k__BackingField: 4
-    <MaxStep>k__BackingField: 6
+    <CountDisks>k__BackingField: 3
+    <MaxCountStep>k__BackingField: 5
   - <Type>k__BackingField: 2
-    <MinStep>k__BackingField: 6
-    <MaxStep>k__BackingField: 7
+    <CountDisks>k__BackingField: 4
+    <MaxCountStep>k__BackingField: 8

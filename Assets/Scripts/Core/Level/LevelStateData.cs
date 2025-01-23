@@ -6,12 +6,14 @@ public class LevelStateData
     public readonly int[][] InitialPosition;
 
     public readonly int DiskCount;
+    public readonly int StepCount;
 
-    public LevelStateData(int[][] initialPositions, int diskCount)
+    public LevelStateData(int[][] initialPositions, int diskCount, int stepCount)
     {
         InitialPosition = initialPositions;
 
         DiskCount = diskCount;
+        StepCount = stepCount;
     }
 
     public override string ToString()

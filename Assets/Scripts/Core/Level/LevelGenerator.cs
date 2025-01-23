@@ -36,7 +36,7 @@ public class LevelGenerator : ILevelGenerator
         
         var initialPosition = CalculateStartPosition(finalColumnIndex);
         
-        var resultData = new LevelStateData(initialPosition, diskCount);
+        var resultData = new LevelStateData(initialPosition, diskCount, randomComplexity.MaxCountStep);
 
         return resultData;
     }
