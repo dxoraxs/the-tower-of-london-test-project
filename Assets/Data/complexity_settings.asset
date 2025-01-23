@@ -16,7 +16,7 @@ MonoBehaviour:
   _complexityData:
   - <Type>k__BackingField: 0
     <CountDisks>k__BackingField: 2
-    <MaxCountStep>k__BackingField: 2
+    <MaxCountStep>k__BackingField: 3
   - <Type>k__BackingField: 1
     <CountDisks>k__BackingField: 3
     <MaxCountStep>k__BackingField: 5

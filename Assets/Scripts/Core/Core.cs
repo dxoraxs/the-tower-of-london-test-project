@@ -53,11 +53,26 @@ public class Core : MonoBehaviour
         _diskController.FastSetDisksToColumn(diskPosition);
     }
 
+    [ContextMenu("Clear player score")]
+    private void ClearPlayerScore()
+    {
+        PlayerScoreManager.Clear();
+    }
+    
     private void Start()
     {
         _stepCounter.Subscribe(_gameScreen.UpdateCounter);
+        _endScreen.OnClickSaveScore += OnClickSaveScore;
         SetRandomDisks();
         WaitingColumnClick();
+    }
+
+    private void OnClickSaveScore(string name)
+    {
+        PlayerScoreManager.Save(name, _stepCounter.Value);
+
+        var newScore = PlayerScoreManager.Load(5);
+        _endScreen.SetScoreItem(newScore);
     }
 
     private async void WaitingColumnClick()
@@ -93,6 +108,8 @@ public class Core : MonoBehaviour
         await UniTask.Delay(1000);
         _gameScreen.HideScreen();
         _endScreen.ShowScreen();
+        var newScore = PlayerScoreManager.Load(5);
+        _endScreen.SetScoreItem(newScore);
         _endScreen.SetResult(resultLevel);
 
         await _endScreen.OnClickRestart.First().ToUniTask();
